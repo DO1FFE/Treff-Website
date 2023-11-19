@@ -111,30 +111,36 @@ def index():
     else:
         meeting_message = f"Das Treffen am {next_meeting_date()} findet wegen zu geringer Beteiligung ({participant_count} Personen) nicht statt. Sollte sich die Anzahl auf 4 erhöhen, findet es statt."
 
-    return render_template_string("""
-        <html>
-        <body>
-            <h2>Treffen am {{ next_meeting }}</h2>
-            <p>{{ meeting_message }}</p>
-            <p style="color:red;">{{ error_message }}</p>
-            <form method="post">
-                <table>
-                    <tr>
-                        <td>Rufzeichen:</td>
-                        <td><input type="text" name="call_sign"></td>
-                    </tr>
-                    <tr>
-                        <td>Name:</td>
-                        <td><input type="text" name="name"></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2"><input type="submit" value="Zusagen/Absagen"></td>
-                    </tr>
-                </table>
-            </form>
-        </body>
-        </html>
-    """, next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message)
+return render_template_string("""
+    <html>
+    <head>
+        <style>
+            .message { font-weight: bold; }
+            .cancelled { color: red; }
+        </style>
+    </head>
+    <body>
+        <h2>Treffen am {{ next_meeting }}</h2>
+        <p class="message {{ 'cancelled' if participant_count < 4 else '' }}">{{ meeting_message }}</p>
+        <p class="message" style="color:red;">{{ error_message }}</p>
+        <form method="post">
+            <table>
+                <tr>
+                    <td>Rufzeichen:</td>
+                    <td><input type="text" name="call_sign"></td>
+                </tr>
+                <tr>
+                    <td>Name:</td>
+                    <td><input type="text" name="name"></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><input type="submit" value="Zusagen/Absagen"></td>
+                </tr>
+            </table>
+        </form>
+    </body>
+    </html>
+""", next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message)
 
 # Bestätigung zum Löschen
 @app.route('/confirm_delete')
