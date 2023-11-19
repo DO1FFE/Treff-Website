@@ -87,11 +87,11 @@ def requires_auth(f):
     return decorated
 
 # Flask App
-app = Flask(__name__)
+treff = Flask(__name__)
 init_db()
 
 # Hauptseite
-@app.route('/', methods=['GET', 'POST'])
+@treff.route('/', methods=['GET', 'POST'])
 def index():
     meeting_message = ""
     error_message = ""
@@ -143,7 +143,7 @@ def index():
     """, next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message)
 
 # Bestätigung zum Löschen
-@app.route('/confirm_delete')
+@treff.route('/confirm_delete')
 def confirm_delete():
     name = request.args.get('name', '')
     call_sign = request.args.get('call_sign', '')
@@ -163,7 +163,7 @@ def confirm_delete():
     """, name=name, call_sign=call_sign)
 
 # Eintrag löschen
-@app.route('/delete', methods=['POST'])
+@treff.route('/delete', methods=['POST'])
 def delete():
     name = request.form.get('name', '')
     call_sign = request.form.get('call_sign', '')
@@ -171,7 +171,7 @@ def delete():
     return redirect(url_for('index'))
 
 # Admin Bereich
-@app.route('/admin')
+@treff.route('/admin')
 @requires_auth
 def admin():
     count, participants = get_meeting_info()
@@ -203,4 +203,4 @@ if __name__ == '__main__':
     db_reset_thread = threading.Thread(target=weekly_db_reset)
     db_reset_thread.start()
     atexit.register(lambda: db_reset_thread.join())
-    app.run(host='0.0.0.0', port=8083, debug=True)
+    treff.run(host='0.0.0.0', port=8083, debug=True)
