@@ -95,6 +95,8 @@ init_db()
 def index():
     meeting_message = ""
     error_message = ""
+    participant_count = 0  # Initialisiere participant_count
+
     if request.method == 'POST':
         name = request.form['name']
         call_sign = request.form['call_sign']
@@ -140,7 +142,7 @@ def index():
             </form>
         </body>
         </html>
-    """, next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message)
+    """, next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message, participant_count=participant_count)
 
 # Bestätigung zum Löschen
 @treff.route('/confirm_delete')
