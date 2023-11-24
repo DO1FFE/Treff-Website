@@ -1,5 +1,7 @@
 from flask import Flask, request, render_template_string, Response, redirect, url_for
 from datetime import datetime, timedelta
+import logging
+from logging.handlers import RotatingFileHandler
 import sqlite3
 import atexit
 import threading
@@ -19,6 +21,20 @@ def load_credentials():
 credentials = load_credentials()
 ADMIN_USERNAME = credentials['ADMIN_USERNAME']
 ADMIN_PASSWORD = credentials['ADMIN_PASSWORD']
+
+# Logger konfigurieren
+def setup_logger():
+    logger = logging.getLogger('TreffenLogger')
+    logger.setLevel(logging.INFO)  # oder DEBUG, WARNING, etc.
+
+    # Log-Rotation einrichten, um zu verhindern, dass die Log-Datei zu groß wird
+    handler = RotatingFileHandler('treff.log', maxBytes=10000, backupCount=5)
+    handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(handler)
+    return logger
+
+# Logger-Instanz erstellen
+logger = setup_logger()
 
 class DatabaseManager:
     def __init__(self, db_name='meeting.db'):
@@ -47,12 +63,14 @@ class DatabaseManager:
         c = conn.cursor()
         c.execute('DELETE FROM meetings')
         conn.commit()
+        logger.info('Datenbank zurückgesetzt')
 
     def add_entry(self, name, call_sign):
         conn = self.get_connection()
         c = conn.cursor()
         c.execute('INSERT INTO meetings (name, call_sign) VALUES (?, ?)', (name, call_sign))
         conn.commit()
+        logger.info(f'Eintrag hinzugefügt: Name: {name}, Rufzeichen: {call_sign}')
 
     def delete_entry(self, name, call_sign):
         conn = self.get_connection()
@@ -67,6 +85,7 @@ class DatabaseManager:
             # Lösche nur auf Basis des Rufzeichens, wenn kein Name angegeben ist
             c.execute('DELETE FROM meetings WHERE call_sign = ?', (call_sign,))
         conn.commit()
+        logger.info(f'Eintrag gelöscht: Name: {name}, Rufzeichen: {call_sign}')
 
     def entry_exists(self, name, call_sign):
         conn = self.get_connection()
