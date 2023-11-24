@@ -321,7 +321,7 @@ def admin():
     """, participants_with_index=participants_with_index)
 
 if __name__ == '__main__':
-    if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+    if not treff.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         logger.info("Hauptprogramm gestartet, starte den Reset-Thread.")
         db_reset_thread = threading.Thread(target=weekly_db_reset)
         db_reset_thread.start()
