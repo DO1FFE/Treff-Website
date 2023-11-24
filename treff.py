@@ -188,11 +188,12 @@ def wrap_text(text, line_length=45):
 
 def is_submission_allowed():
     local_time = get_local_time()
-    if local_time.weekday() < 3 or (local_time.weekday() == 3 and local_time.hour < 15):
-        return True
-    elif local_time.weekday() == 4 and local_time.hour >= 21:  # Freitag nach 21 Uhr
-        return True
-    return False
+    # Eingabe ist nicht erlaubt von Donnerstag 15:00 Uhr bis Freitag 21:00 Uhr
+    if local_time.weekday() == 3 and local_time.hour >= 15:
+        return False
+    elif local_time.weekday() == 4 and local_time.hour < 21:
+        return False
+    return True
 
 treff = Flask(__name__)
 
