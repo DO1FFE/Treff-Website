@@ -4,74 +4,76 @@ import sqlite3
 import atexit
 import threading
 import time
+import re
 
 # Admin-Anmeldedaten (Ändern Sie diese für Ihre Umgebung)
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'password'
 
-# Datenbankinitialisierung
-def init_db():
-    conn = sqlite3.connect('meeting.db')
-    c = conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS meetings (name TEXT, call_sign TEXT)')
-    conn.commit()
-    conn.close()
+class DatabaseManager:
+    def __init__(self, db_name='meeting.db'):
+        self.db_name = db_name
+        self.conn = None
+        self.init_db()
 
-# Nächstes Treffen berechnen
+    def get_connection(self):
+        if not self.conn:
+            self.conn = sqlite3.connect(self.db_name)
+        return self.conn
+
+    def close_connection(self):
+        if self.conn:
+            self.conn.close()
+            self.conn = None
+
+    def init_db(self):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute('CREATE TABLE IF NOT EXISTS meetings (name TEXT, call_sign TEXT)')
+        conn.commit()
+
+    def reset_db(self):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute('DELETE FROM meetings')
+        conn.commit()
+
+    def add_entry(self, name, call_sign):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute('INSERT INTO meetings (name, call_sign) VALUES (?, ?)', (name, call_sign))
+        conn.commit()
+
+    def delete_entry(self, name, call_sign):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute('DELETE FROM meetings WHERE name = ? OR call_sign = ?', (name, call_sign))
+        conn.commit()
+
+    def entry_exists(self, name, call_sign):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT * FROM meetings WHERE name = ? OR call_sign = ?', (name, call_sign))
+        return c.fetchone() is not None
+
+    def get_meeting_info(self):
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT * FROM meetings')
+        participants = c.fetchall()
+        return len(participants), participants
+
+db_manager = DatabaseManager()
+
 def next_meeting_date():
     today = datetime.now()
     next_friday = today + timedelta((4-today.weekday()) % 7)
     return next_friday.strftime('%d.%m.%Y')
 
-# Datenbank jede Woche freitags um 21 Uhr leeren
-def weekly_db_reset():
-    while True:
-        now = datetime.now()
-        next_friday = next_meeting_date()
-        next_friday_date = datetime.strptime(next_friday, '%d.%m.%Y')
-        reset_time = next_friday_date.replace(hour=21, minute=0, second=0)
-        time_to_wait = (reset_time - now).total_seconds()
-        time.sleep(max(time_to_wait, 0))
-        init_db()
-
-# Prüfen, ob Eintrag bereits existiert
-def entry_exists(name, call_sign):
-    conn = sqlite3.connect('meeting.db')
-    c = conn.cursor()
-    c.execute('SELECT * FROM meetings WHERE name = ? OR call_sign = ?', (name, call_sign))
-    exists = c.fetchone() is not None
-    conn.close()
-    return exists
-
-# Eintrag hinzufügen
-def add_entry(name, call_sign):
-    conn = sqlite3.connect('meeting.db')
-    c = conn.cursor()
-    c.execute('INSERT INTO meetings (name, call_sign) VALUES (?, ?)', (name, call_sign))
-    conn.commit()
-    conn.close()
-
-# Eintrag löschen
-def delete_entry(name, call_sign):
-    conn = sqlite3.connect('meeting.db')
-    c = conn.cursor()
-    c.execute('DELETE FROM meetings WHERE name = ? OR call_sign = ?', (name, call_sign))
-    conn.commit()
-    conn.close()
-
-# Teilnehmeranzahl und -liste abfragen
-def get_meeting_info():
-    conn = sqlite3.connect('meeting.db')
-    c = conn.cursor()
-    c.execute('SELECT * FROM meetings')
-    participants = c.fetchall()
-    count = len(participants)
-    conn.close()
-    return count, participants
-
-# Authentifizierung für Admin-Bereich
-def check_auth(username, password):
-    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
+def validate_input(text):
+    if not text or not re.match(r'^[\w\s-]+$', text):
+        return False
+    return True
 
 def authenticate():
     return Response(
@@ -81,33 +83,43 @@ def authenticate():
 def requires_auth(f):
     def decorated(*args, **kwargs):
         auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
+        if not auth or not (auth.username == ADMIN_USERNAME and auth.password == ADMIN_PASSWORD):
             return authenticate()
         return f(*args, **kwargs)
     return decorated
 
-# Flask App
-treff = Flask(__name__)
-init_db()
+def weekly_db_reset():
+    while True:
+        now = datetime.now()
+        next_friday = next_meeting_date()
+        next_friday_date = datetime.strptime(next_friday, '%d.%m.%Y')
+        reset_time = next_friday_date.replace(hour=21, minute=0, second=0)
+        time_to_wait = (reset_time - now).total_seconds()
+        time.sleep(max(time_to_wait, 0))
+        db_manager.reset_db()
 
-# Hauptseite
+treff = Flask(__name__)
+
 @treff.route('/', methods=['GET', 'POST'])
 def index():
     meeting_message = ""
     error_message = ""
-    participant_count = 0  # Initialisiere participant_count
+    participant_count = 0
 
     if request.method == 'POST':
         name = request.form['name']
         call_sign = request.form['call_sign']
-        if not name and not call_sign:
+
+        if not validate_input(name) or not validate_input(call_sign):
+            error_message = "Ungültige Eingabe. Bitte nur Buchstaben, Zahlen und Bindestriche verwenden."
+        elif not name and not call_sign:
             error_message = "Bitte mindestens ein Feld ausfüllen."
-        elif entry_exists(name, call_sign):
+        elif db_manager.entry_exists(name, call_sign):
             return redirect(url_for('confirm_delete', name=name, call_sign=call_sign))
         else:
-            add_entry(name, call_sign)
+            db_manager.add_entry(name, call_sign)
 
-    participant_count, _ = get_meeting_info()
+    participant_count, _ = db_manager.get_meeting_info()
     if participant_count >= 4:
         meeting_message = f"Das Treffen am {next_meeting_date()} findet statt! Es haben sich {participant_count} Personen angemeldet."
     else:
@@ -117,8 +129,11 @@ def index():
         <html>
         <head>
             <style>
-                .message { font-weight: bold; }
-                .cancelled { color: red; }
+                body { font-family: Arial, sans-serif; }
+                @media only screen and (max-width: 600px) {
+                    body { font-size: 18px; }
+                    .message { white-space: normal; }
+                }
             </style>
         </head>
         <body>
@@ -144,7 +159,6 @@ def index():
         </html>
     """, next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message, participant_count=participant_count)
 
-# Bestätigung zum Löschen
 @treff.route('/confirm_delete')
 def confirm_delete():
     name = request.args.get('name', '')
@@ -164,19 +178,17 @@ def confirm_delete():
         </html>
     """, name=name, call_sign=call_sign)
 
-# Eintrag löschen
 @treff.route('/delete', methods=['POST'])
 def delete():
     name = request.form.get('name', '')
     call_sign = request.form.get('call_sign', '')
-    delete_entry(name, call_sign)
+    db_manager.delete_entry(name, call_sign)
     return redirect(url_for('index'))
 
-# Admin Bereich
 @treff.route('/admin')
 @requires_auth
 def admin():
-    count, participants = get_meeting_info()
+    count, participants = db_manager.get_meeting_info()
     participants_with_index = enumerate(participants, start=1)
     return render_template_string("""
         <html>
@@ -200,9 +212,9 @@ def admin():
         </html>
     """, participants_with_index=participants_with_index)
 
-# Server starten
 if __name__ == '__main__':
     db_reset_thread = threading.Thread(target=weekly_db_reset)
     db_reset_thread.start()
     atexit.register(lambda: db_reset_thread.join())
     treff.run(host='0.0.0.0', port=8083, debug=True)
+    
