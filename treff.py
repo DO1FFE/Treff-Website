@@ -171,7 +171,7 @@ def is_submission_allowed():
     now = datetime.now()
     if now.weekday() < 3:  # Montag=0, Dienstag=1, Mittwoch=2
         return True
-    elif now.weekday() == 3 and now.hour < 15:  # Donnerstag=3 und Uhrzeit vor 15:00 Uhr
+    elif now.weekday() == 3 and now.hour < 14:  # Donnerstag=3 und Uhrzeit vor 14:00 Uhr UTC
         return True
     else:
         return False
