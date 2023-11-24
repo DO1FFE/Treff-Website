@@ -23,6 +23,12 @@ credentials = load_credentials()
 ADMIN_USERNAME = credentials['ADMIN_USERNAME']
 ADMIN_PASSWORD = credentials['ADMIN_PASSWORD']
 
+# Standardmäßige Reset-Zeit (Freitag um 21 Uhr)
+RESET_WEEKDAY = 4  # Freitag (Montag=0, Dienstag=1, ..., Sonntag=6)
+RESET_HOUR = 22
+RESET_MINUTE = 45
+
+
 # Logger konfigurieren
 def setup_logger():
     logger = logging.getLogger('TreffenLogger')
@@ -152,12 +158,15 @@ def requires_auth(f):
 def weekly_db_reset():
     while True:
         now = get_local_time()
-        next_friday = next_meeting_date()
-        next_friday_date = datetime.strptime(next_friday, '%d.%m.%Y')
-        reset_time = next_friday_date.replace(hour=21, minute=0, second=0)
-        time_to_wait = (reset_time - now).total_seconds()
-        logger.info(f"Nächstes Datenbank-Reset geplant für: {reset_time}")
-        time.sleep(max(time_to_wait, 0))
+        days_until_reset = (RESET_WEEKDAY - now.weekday()) % 7
+        next_reset = now + timedelta(days=days_until_reset)
+        next_reset = next_reset.replace(hour=RESET_HOUR, minute=RESET_MINUTE, second=0)
+
+        time_to_wait = (next_reset - now).total_seconds()
+        
+        logger.info(f"Nächstes Datenbank-Reset geplant für: {next_reset}")
+
+        time.sleep(max(time_to_wait, 0))  # Warte bis zum Reset-Zeitpunkt
         db_manager.reset_db()
         logger.info("Datenbank wurde zurückgesetzt")
 
