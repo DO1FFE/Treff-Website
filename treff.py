@@ -168,7 +168,10 @@ def weekly_db_reset():
         
         logger.info(f"Nächstes Datenbank-Reset geplant für: {next_reset}")
 
-        time.sleep(max(time_to_wait, 0))  # Warte bis zum Reset-Zeitpunkt
+        min_sleep_time = 60  # Mindestens 60 Sekunden warten
+        time.sleep(max(time_to_wait, min_sleep_time))
+
+        #time.sleep(max(time_to_wait, 0))  # Warte bis zum Reset-Zeitpunkt
         db_manager.reset_db()
         logger.info("Ende der weekly_db_reset")
 
