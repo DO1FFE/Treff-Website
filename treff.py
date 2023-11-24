@@ -113,7 +113,7 @@ def wrap_text(text, line_length=40):
             current_line += (word + " ")
         else:
             lines.append(current_line)
-            current_line = word + " "
+            current_line = word + "<br>"
 
     lines.append(current_line)  # Füge den letzten Textzeile hinzu
     return "\n".join(lines).strip()
