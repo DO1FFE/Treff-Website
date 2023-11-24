@@ -219,7 +219,9 @@ def index():
             </style>
         </head>
         <body>
-            <h2>Das nächste L11 Clubtreffen am {{ next_meeting }}</h2>
+            <h2>Das nächste L11 Clubtreffen ist am Freitag, {{ next_meeting }}</h2>
+            <h3>Hier kannst du dich dafür anmelden.</h3>
+            <h4>Bitte Freitags nachschauen, ob es stattfindet!!!</h4>
             <p class="message {{ 'cancelled' if participant_count < 4 else '' }}">{{ meeting_message|safe }}</p>
             <p class="message" style="color:red;">{{ error_message }}</p>
             <form method="post">
