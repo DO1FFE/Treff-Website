@@ -130,8 +130,9 @@ def index():
         <head>
             <style>
                 body { font-family: Arial, sans-serif; }
+                .cancelled { color: red; }
                 @media only screen and (max-width: 600px) {
-                    body { font-size: 18px; }
+                    body { font-size: 18px; } /* Größere Schrift für mobile Geräte */
                     .message { white-space: normal; }
                 }
             </style>
