@@ -53,7 +53,19 @@ class DatabaseManager:
     def entry_exists(self, name, call_sign):
         conn = self.get_connection()
         c = conn.cursor()
-        c.execute('SELECT * FROM meetings WHERE name = ? OR call_sign = ?', (name, call_sign))
+        if name and call_sign:
+            # Überprüfe, ob ein Eintrag mit genau dem gleichen Namen UND Rufzeichen existiert
+            c.execute('SELECT * FROM meetings WHERE name = ? AND call_sign = ?', (name, call_sign))
+        elif name:
+            # Überprüfe nur den Namen, wenn kein Rufzeichen angegeben ist
+            c.execute('SELECT * FROM meetings WHERE name = ?', (name,))
+        elif call_sign:
+            # Überprüfe nur das Rufzeichen, wenn kein Name angegeben ist
+            c.execute('SELECT * FROM meetings WHERE call_sign = ?', (call_sign,))
+        else:
+            # Keine gültige Eingabe
+            return False
+            
         return c.fetchone() is not None
 
     def get_meeting_info(self):
