@@ -228,11 +228,11 @@ def index():
                 <table>
                     <tr>
                         <td>Rufzeichen:</td>
-                        <td><input type="text" name="call_sign"></td>
+                        <td><input type="text" name="call_sign" {{ 'disabled' if not submission_allowed }}></td>
                     </tr>
                     <tr>
                         <td>Name:</td>
-                        <td><input type="text" name="name"></td>
+                        <td><input type="text" name="name" {{ 'disabled' if not submission_allowed }}></td>
                     </tr>
                     <tr>
                     <td colspan="2">&nbsp</td>
