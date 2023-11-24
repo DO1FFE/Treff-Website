@@ -71,7 +71,7 @@ def next_meeting_date():
     return next_friday.strftime('%d.%m.%Y')
 
 def validate_input(text):
-    if not text or not re.match(r'^[\w\s-]+$', text):
+    if not text or not re.match(r'^[a-zA-Z0-9äöüÄÖÜß\s-]+$', text):
         return False
     return True
 
