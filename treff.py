@@ -238,7 +238,7 @@ def index():
                     <td colspan="2">&nbsp</td>
                     </tr>
                     <tr>
-                        <td colspan="2"><input type="submit" value="Zusagen/Absagen"></td>
+                        <td colspan="2"><input type="submit" value="Zusagen/Absagen" {{ 'disabled' if not submission_allowed }}></td>
                     </tr>
                 </table>
             </form>
