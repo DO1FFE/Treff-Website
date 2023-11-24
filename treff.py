@@ -63,14 +63,14 @@ class DatabaseManager:
         c = conn.cursor()
         c.execute('DELETE FROM meetings')
         conn.commit()
-        logger.info('Datenbank zurückgesetzt')
+        logger.info('********* Datenbank zurückgesetzt! *********')
 
     def add_entry(self, name, call_sign):
         conn = self.get_connection()
         c = conn.cursor()
         c.execute('INSERT INTO meetings (name, call_sign) VALUES (?, ?)', (name, call_sign))
         conn.commit()
-        logger.info(f'Eintrag hinzugefügt: Name: {name}, Rufzeichen: {call_sign}')
+        logger.info(f'Eintrag hinzugefügt: Rufzeichen: {call_sign}, Name: {name}')
 
     def delete_entry(self, name, call_sign):
         conn = self.get_connection()
@@ -85,7 +85,7 @@ class DatabaseManager:
             # Lösche nur auf Basis des Rufzeichens, wenn kein Name angegeben ist
             c.execute('DELETE FROM meetings WHERE call_sign = ?', (call_sign,))
         conn.commit()
-        logger.info(f'Eintrag gelöscht: Name: {name}, Rufzeichen: {call_sign}')
+        logger.info(f'Eintrag gelöscht: Rufzeichen: {call_sign}, Name: {name}')
 
     def entry_exists(self, name, call_sign):
         conn = self.get_connection()
