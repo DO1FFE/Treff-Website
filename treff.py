@@ -103,7 +103,7 @@ def weekly_db_reset():
         time.sleep(max(time_to_wait, 0))
         db_manager.reset_db()
 
-def wrap_text(text, line_length=40):
+def wrap_text(text, line_length=45):
     words = text.split()
     lines = []
     current_line = ""
