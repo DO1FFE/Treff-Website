@@ -25,8 +25,8 @@ ADMIN_PASSWORD = credentials['ADMIN_PASSWORD']
 
 # Standardmäßige Reset-Zeit (Freitag um 21 Uhr)
 RESET_WEEKDAY = 4  # Freitag (Montag=0, Dienstag=1, ..., Sonntag=6)
-RESET_HOUR = 23
-RESET_MINUTE = 5
+RESET_HOUR = 21
+RESET_MINUTE = 0
 
 
 # Logger konfigurieren
@@ -71,7 +71,7 @@ class DatabaseManager:
             c = conn.cursor()
             c.execute('DELETE FROM meetings')
             conn.commit()
-            logger.info('********* Datenbank zurückgesetzt! *********')
+            logger.info("def reset_db wurde aufgerufen.")
 
     def add_entry(self, name, call_sign):
         conn = self.get_connection()
@@ -170,7 +170,7 @@ def weekly_db_reset():
 
         time.sleep(max(time_to_wait, 0))  # Warte bis zum Reset-Zeitpunkt
         db_manager.reset_db()
-        logger.info("Datenbank wurde zurückgesetzt")
+        logger.info("Ende der weekly_db_reset")
 
 def wrap_text(text, line_length=45):
     words = text.split()
@@ -326,4 +326,4 @@ if __name__ == '__main__':
         db_reset_thread = threading.Thread(target=weekly_db_reset)
         db_reset_thread.start()
         atexit.register(lambda: db_reset_thread.join())
-    treff.run(host='0.0.0.0', port=8083, debug=True, use_reloader=False)
+    treff.run(host='0.0.0.0', port=8083, use_reloader=False)
