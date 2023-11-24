@@ -219,7 +219,7 @@ def index():
             </style>
         </head>
         <body>
-            <h2>Treffen am {{ next_meeting }}</h2>
+            <h2>Das nächste L11 Clubtreffen am {{ next_meeting }}</h2>
             <p class="message {{ 'cancelled' if participant_count < 4 else '' }}">{{ meeting_message|safe }}</p>
             <p class="message" style="color:red;">{{ error_message }}</p>
             <form method="post">
