@@ -71,8 +71,13 @@ def next_meeting_date():
     return next_friday.strftime('%d.%m.%Y')
 
 def validate_input(text):
-    if not text or not re.match(r'^[a-zA-Z0-9äöüÄÖÜß\s-]+$', text):
+    # Erlaubt leere Eingaben, da entweder Name oder Rufzeichen ausgefüllt sein können
+    if text is None or text.strip() == "":
+        return True
+
+    if not re.match(r'^[A-Za-z0-9äöüÄÖÜß\s\-]+$', text):
         return False
+
     return True
 
 def authenticate():
