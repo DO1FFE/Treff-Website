@@ -26,7 +26,7 @@ ADMIN_PASSWORD = credentials['ADMIN_PASSWORD']
 # Standardmäßige Reset-Zeit (Freitag um 21 Uhr)
 RESET_WEEKDAY = 4  # Freitag (Montag=0, Dienstag=1, ..., Sonntag=6)
 RESET_HOUR = 23
-RESET_MINUTE = 05
+RESET_MINUTE = 5
 
 
 # Logger konfigurieren
