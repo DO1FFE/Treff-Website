@@ -167,6 +167,15 @@ def wrap_text(text, line_length=45):
     lines.append(current_line)  # Füge den letzten Textzeile hinzu
     return "<br>".join(lines).strip()
 
+def is_submission_allowed():
+    now = datetime.now()
+    if now.weekday() < 3:  # Montag=0, Dienstag=1, Mittwoch=2
+        return True
+    elif now.weekday() == 3 and now.hour < 15:  # Donnerstag=3 und Uhrzeit vor 15:00 Uhr
+        return True
+    else:
+        return False
+
 treff = Flask(__name__)
 
 @treff.route('/', methods=['GET', 'POST'])
@@ -195,6 +204,7 @@ def index():
         meeting_message = f"Das Treffen am {next_meeting_date()} findet wegen zu geringer Beteiligung ({participant_count} Personen) nicht statt. Sollte sich die Anzahl auf 4 erhöhen, findet es statt."
     
     wrapped_meeting_message = wrap_text(meeting_message)
+    submission_allowed = is_submission_allowed()
     
     return render_template_string("""
         <html>
@@ -232,7 +242,7 @@ def index():
             </form>
         </body>
         </html>
-    """, next_meeting=next_meeting_date(), meeting_message=wrapped_meeting_message, error_message=error_message, participant_count=participant_count)
+    """, submission_allowed=submission_allowed, next_meeting=next_meeting_date(), meeting_message=wrapped_meeting_message, error_message=error_message, participant_count=participant_count)
 
 @treff.route('/confirm_delete')
 def confirm_delete():
