@@ -42,7 +42,6 @@ def setup_logger():
 
 # Logger-Instanz erstellen
 logger = setup_logger()
-logger.info("Logger wurde eingerichtet.")
 
 class DatabaseManager:
     def __init__(self, db_name='meeting.db'):
@@ -71,7 +70,6 @@ class DatabaseManager:
             c = conn.cursor()
             c.execute('DELETE FROM meetings')
             conn.commit()
-            logger.info("def reset_db wurde aufgerufen.")
 
     def add_entry(self, name, call_sign):
         conn = self.get_connection()
@@ -323,7 +321,7 @@ def admin():
 
 if __name__ == '__main__':
     if not treff.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        logger.info("Hauptprogramm gestartet, starte den Reset-Thread.")
+        logger.info("******** Hauptprogramm gestartet, starte den Reset-Thread.")
         db_reset_thread = threading.Thread(target=weekly_db_reset)
         db_reset_thread.start()
         atexit.register(lambda: db_reset_thread.join())
