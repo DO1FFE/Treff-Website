@@ -52,7 +52,7 @@ class DatabaseManager:
 
     def get_connection(self):
         if not self.conn:
-            self.conn = sqlite3.connect(self.db_name)
+            self.conn = sqlite3.connect(self.db_name, check_same_thread=False)
         return self.conn
 
     def close_connection(self):
@@ -67,11 +67,11 @@ class DatabaseManager:
         conn.commit()
 
     def reset_db(self):
-        conn = self.get_connection()
-        c = conn.cursor()
-        c.execute('DELETE FROM meetings')
-        conn.commit()
-        logger.info('********* Datenbank zurückgesetzt! *********')
+        with sqlite3.connect(self.db_name) as conn:
+            c = conn.cursor()
+            c.execute('DELETE FROM meetings')
+            conn.commit()
+            logger.info('********* Datenbank zurückgesetzt! *********')
 
     def add_entry(self, name, call_sign):
         conn = self.get_connection()
