@@ -180,6 +180,8 @@ def is_submission_allowed():
     local_time = get_local_time()
     if local_time.weekday() < 3 or (local_time.weekday() == 3 and local_time.hour < 15):
         return True
+    elif local_time.weekday() == 4 and local_time.hour >= 21:  # Freitag nach 21 Uhr
+        return True
     return False
 
 treff = Flask(__name__)
