@@ -47,7 +47,15 @@ class DatabaseManager:
     def delete_entry(self, name, call_sign):
         conn = self.get_connection()
         c = conn.cursor()
-        c.execute('DELETE FROM meetings WHERE name = ? OR call_sign = ?', (name, call_sign))
+        if name and call_sign:
+            # Lösche den Eintrag mit dem genauen Namen UND Rufzeichen
+            c.execute('DELETE FROM meetings WHERE name = ? AND call_sign = ?', (name, call_sign))
+        elif name:
+            # Lösche nur auf Basis des Namens, wenn kein Rufzeichen angegeben ist
+            c.execute('DELETE FROM meetings WHERE name = ?', (name,))
+        elif call_sign:
+            # Lösche nur auf Basis des Rufzeichens, wenn kein Name angegeben ist
+            c.execute('DELETE FROM meetings WHERE call_sign = ?', (call_sign,))
         conn.commit()
 
     def entry_exists(self, name, call_sign):
