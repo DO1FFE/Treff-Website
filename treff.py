@@ -267,7 +267,7 @@ def index():
             </p>
         </body>
         </html>
-    """, submission_allowed=submission_allowed, next_meeting=next_meeting_date(), meeting_message=wrapped_meeting_message, error_message=error_message, participant_count=participant_count)
+    """, submission_allowed=submission_allowed, next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message, participant_count=participant_count)
 
 @treff.route('/confirm_delete')
 def confirm_delete():
