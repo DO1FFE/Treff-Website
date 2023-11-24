@@ -261,6 +261,10 @@ def index():
                     </tr>
                 </table>
             </form>
+            <p>Entweder das Rufzeichen oder den Namen angeben reicht aus.<br>Jede Person sollte sich selbst an- oder abmelden.<br>Bis Donnerstags 15Uhr hat jeder Zeit dazu.<br>Sind bis zu diesem Zeitpunkt zu wenige Anmeldungen, findet das Clubtreffen nicht statt! Ein Hinweistext wird oben angezeigt.<br>Die Datenbank resettet sich Freitags um 21Uhr, danach sind neue Anmeldungen für die Folgewoche möglich.<br>
+            Fehler bitte wie immer gerne per Mail an mich senden: <a href="mailto:do1ffe@darc.de">do1ffe@darc.de</a><br>
+            Vy 73 Erik, DO1FFE - OVV L11
+            </p>
         </body>
         </html>
     """, submission_allowed=submission_allowed, next_meeting=next_meeting_date(), meeting_message=wrapped_meeting_message, error_message=error_message, participant_count=participant_count)
