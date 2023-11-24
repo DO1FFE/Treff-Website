@@ -156,6 +156,7 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
+
 def weekly_db_reset():
     logger.info("Reset-Thread gestartet.")
     while True:
@@ -163,17 +164,14 @@ def weekly_db_reset():
         days_until_reset = (RESET_WEEKDAY - now.weekday()) % 7
         next_reset = now + timedelta(days=days_until_reset)
         next_reset = next_reset.replace(hour=RESET_HOUR, minute=RESET_MINUTE, second=0)
-
-        time_to_wait = (next_reset - now).total_seconds()
+        if next_reset <= now:
+            next_reset += timedelta(days=7)
         
+        time_to_wait = (next_reset - now).total_seconds()
         logger.info(f"Nächstes Datenbank-Reset geplant für: {next_reset}")
-
-        min_sleep_time = 60  # Mindestens 60 Sekunden warten
-        time.sleep(max(time_to_wait, min_sleep_time))
-
-        #time.sleep(max(time_to_wait, 0))  # Warte bis zum Reset-Zeitpunkt
+        time.sleep(max(time_to_wait, 0))
         db_manager.reset_db()
-        logger.info("Ende der weekly_db_reset")
+        logger.info("Datenbank wurde zurückgesetzt")
 
 def wrap_text(text, line_length=45):
     words = text.split()
