@@ -103,6 +103,21 @@ def weekly_db_reset():
         time.sleep(max(time_to_wait, 0))
         db_manager.reset_db()
 
+def wrap_text(text, line_length=40):
+    words = text.split()
+    lines = []
+    current_line = ""
+
+    for word in words:
+        if len(current_line) + len(word) + 1 <= line_length:
+            current_line += (word + " ")
+        else:
+            lines.append(current_line)
+            current_line = word + " "
+
+    lines.append(current_line)  # Füge den letzten Textzeile hinzu
+    return "\n".join(lines).strip()
+
 treff = Flask(__name__)
 
 @treff.route('/', methods=['GET', 'POST'])
@@ -129,7 +144,9 @@ def index():
         meeting_message = f"Das Treffen am {next_meeting_date()} findet statt! Es haben sich {participant_count} Personen angemeldet."
     else:
         meeting_message = f"Das Treffen am {next_meeting_date()} findet wegen zu geringer Beteiligung ({participant_count} Personen) nicht statt. Sollte sich die Anzahl auf 4 erhöhen, findet es statt."
-
+    
+    wrapped_meeting_message = wrap_text(meeting_message)
+    
     return render_template_string("""
         <html>
         <head>
@@ -163,7 +180,7 @@ def index():
             </form>
         </body>
         </html>
-    """, next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message, participant_count=participant_count)
+    """, next_meeting=next_meeting_date(), meeting_message=wrapped_meeting_message, error_message=error_message, participant_count=participant_count)
 
 @treff.route('/confirm_delete')
 def confirm_delete():
