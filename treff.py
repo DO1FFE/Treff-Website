@@ -6,9 +6,19 @@ import threading
 import time
 import re
 
-# Admin-Anmeldedaten (Ändern Sie diese für Ihre Umgebung)
-ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = 'password'
+# Admin-Anmeldedaten einlesen aus .pwd Datei
+def load_credentials():
+    with open('.pwd', 'r') as file:
+        lines = file.readlines()
+        credentials = {}
+        for line in lines:
+            key, value = line.strip().split('=')
+            credentials[key] = value
+        return credentials
+
+credentials = load_credentials()
+ADMIN_USERNAME = credentials['ADMIN_USERNAME']
+ADMIN_PASSWORD = credentials['ADMIN_PASSWORD']
 
 class DatabaseManager:
     def __init__(self, db_name='meeting.db'):
