@@ -118,10 +118,12 @@ db_manager = DatabaseManager()
 def get_local_time():
     local_timezone = pytz.timezone('Europe/Berlin')  # Setzen Sie hier Ihre lokale Zeitzone
     return datetime.now(local_timezone)
-    
+
 def next_meeting_date():
-    today = datetime.now()
-    next_friday = today + timedelta((4-today.weekday()) % 7)
+    now = get_local_time()
+    next_friday = now + timedelta((4 - now.weekday()) % 7)
+    if now.weekday() == 4 and now.hour >= 21:  # Wenn heute Freitag nach 21 Uhr ist
+        next_friday += timedelta(days=7)  # Nächster Freitag ist in einer Woche
     return next_friday.strftime('%d.%m.%Y')
 
 def validate_input(text):
@@ -175,13 +177,10 @@ def wrap_text(text, line_length=45):
     return "<br>".join(lines).strip()
 
 def is_submission_allowed():
-    now = get_local_time()
-    if now.weekday() < 3:  # Montag=0, Dienstag=1, Mittwoch=2
+    local_time = get_local_time()
+    if local_time.weekday() < 3 or (local_time.weekday() == 3 and local_time.hour < 15):
         return True
-    elif now.weekday() == 3 and now.hour < 15:  # Donnerstag=3 und Uhrzeit vor 15:00 Uhr
-        return True
-    else:
-        return False
+    return False
 
 treff = Flask(__name__)
 
@@ -227,7 +226,7 @@ def index():
         </head>
         <body>
             <h2>Das nächste L11 Clubtreffen ist am Freitag, {{ next_meeting }}</h2>
-            <h3>Hier kannst du dich dafür anmelden.</h3>
+            <h3>Hier kannst du dich dafür bis Donnerstag um 15Uhr anmelden.</h3>
             <h4>Bitte Freitags nachschauen, ob es stattfindet!!!</h4>
             <p class="message {{ 'cancelled' if participant_count < 4 else '' }}">{{ meeting_message|safe }}</p>
             <p class="message" style="color:red;">{{ error_message }}</p>
