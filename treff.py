@@ -42,6 +42,7 @@ def setup_logger():
 
 # Logger-Instanz erstellen
 logger = setup_logger()
+logger.info("Logger wurde eingerichtet.")
 
 class DatabaseManager:
     def __init__(self, db_name='meeting.db'):
