@@ -6,6 +6,7 @@ import sqlite3
 import atexit
 import threading
 import time
+import pytz
 import re
 
 # Admin-Anmeldedaten einlesen aus .pwd Datei
@@ -114,6 +115,10 @@ class DatabaseManager:
 
 db_manager = DatabaseManager()
 
+def get_local_time():
+    local_timezone = pytz.timezone('Europe/Berlin')  # Setzen Sie hier Ihre lokale Zeitzone
+    return datetime.now(local_timezone)
+    
 def next_meeting_date():
     today = datetime.now()
     next_friday = today + timedelta((4-today.weekday()) % 7)
@@ -144,13 +149,15 @@ def requires_auth(f):
 
 def weekly_db_reset():
     while True:
-        now = datetime.now()
+        now = get_local_time()
         next_friday = next_meeting_date()
         next_friday_date = datetime.strptime(next_friday, '%d.%m.%Y')
         reset_time = next_friday_date.replace(hour=21, minute=0, second=0)
         time_to_wait = (reset_time - now).total_seconds()
+        logger.info(f"Nächstes Datenbank-Reset geplant für: {reset_time}")
         time.sleep(max(time_to_wait, 0))
         db_manager.reset_db()
+        logger.info("Datenbank wurde zurückgesetzt")
 
 def wrap_text(text, line_length=45):
     words = text.split()
@@ -168,10 +175,10 @@ def wrap_text(text, line_length=45):
     return "<br>".join(lines).strip()
 
 def is_submission_allowed():
-    now = datetime.now()
+    now = get_local_time()
     if now.weekday() < 3:  # Montag=0, Dienstag=1, Mittwoch=2
         return True
-    elif now.weekday() == 3 and now.hour < 14:  # Donnerstag=3 und Uhrzeit vor 14:00 Uhr UTC
+    elif now.weekday() == 3 and now.hour < 15:  # Donnerstag=3 und Uhrzeit vor 15:00 Uhr
         return True
     else:
         return False
