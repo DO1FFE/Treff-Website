@@ -113,10 +113,10 @@ def wrap_text(text, line_length=40):
             current_line += (word + " ")
         else:
             lines.append(current_line)
-            current_line = word + "<br>"
+            current_line = word + " "
 
     lines.append(current_line)  # Füge den letzten Textzeile hinzu
-    return "\n".join(lines).strip()
+    return "<br>".join(lines).strip()
 
 treff = Flask(__name__)
 
@@ -161,7 +161,7 @@ def index():
         </head>
         <body>
             <h2>Treffen am {{ next_meeting }}</h2>
-            <p class="message {{ 'cancelled' if participant_count < 4 else '' }}">{{ meeting_message }}</p>
+            <p class="message {{ 'cancelled' if participant_count < 4 else '' }}">{{ meeting_message|safe }}</p>
             <p class="message" style="color:red;">{{ error_message }}</p>
             <form method="post">
                 <table>
