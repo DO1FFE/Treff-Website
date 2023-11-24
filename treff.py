@@ -26,7 +26,7 @@ ADMIN_PASSWORD = credentials['ADMIN_PASSWORD']
 # Standardmäßige Reset-Zeit (Freitag um 21 Uhr)
 RESET_WEEKDAY = 4  # Freitag (Montag=0, Dienstag=1, ..., Sonntag=6)
 RESET_HOUR = 22
-RESET_MINUTE = 45
+RESET_MINUTE = 50
 
 
 # Logger konfigurieren
@@ -156,6 +156,7 @@ def requires_auth(f):
     return decorated
 
 def weekly_db_reset():
+    logger.info("Reset-Thread gestartet.")
     while True:
         now = get_local_time()
         days_until_reset = (RESET_WEEKDAY - now.weekday()) % 7
@@ -319,8 +320,8 @@ def admin():
     """, participants_with_index=participants_with_index)
 
 if __name__ == '__main__':
+    logger.info("Hauptprogramm gestartet, starte den Reset-Thread.")
     db_reset_thread = threading.Thread(target=weekly_db_reset)
     db_reset_thread.start()
     atexit.register(lambda: db_reset_thread.join())
-    treff.run(host='0.0.0.0', port=8083)
-    
+    treff.run(host='0.0.0.0', port=8083, debug=True)
