@@ -312,5 +312,5 @@ if __name__ == '__main__':
     db_reset_thread = threading.Thread(target=weekly_db_reset)
     db_reset_thread.start()
     atexit.register(lambda: db_reset_thread.join())
-    treff.run(host='0.0.0.0', port=8083, debug=True)
+    treff.run(host='0.0.0.0', port=8083)
     
