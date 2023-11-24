@@ -174,7 +174,7 @@ def index():
                 body { font-family: Arial, sans-serif; }
                 .cancelled { color: red; }
                 @media only screen and (max-width: 600px) {
-                    body { font-size: 18px; } /* Größere Schrift für mobile Geräte */
+                    body { font-size: 20px; } /* Größere Schrift für mobile Geräte */
                     .message { white-space: normal; }
                 }
             </style>
@@ -192,6 +192,9 @@ def index():
                     <tr>
                         <td>Name:</td>
                         <td><input type="text" name="name"></td>
+                    </tr>
+                    <tr>
+                    <td colspan="2">&nbsp</td>
                     </tr>
                     <tr>
                         <td colspan="2"><input type="submit" value="Zusagen/Absagen"></td>
@@ -251,6 +254,8 @@ def admin():
                 </tr>
                 {% endfor %}
             </table>
+            <br><br>
+            <a href="{{ url_for('index') }}">Hauptseite</a>
         </body>
         </html>
     """, participants_with_index=participants_with_index)
