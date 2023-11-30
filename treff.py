@@ -216,15 +216,21 @@ def index():
         else:
             db_manager.add_entry(name, call_sign)
 
-    participant_count, _ = db_manager.get_meeting_info()
-    if participant_count >= 4:
-        meeting_message = f"Das Treffen am {next_meeting_date()} findet statt! Es haben sich {participant_count} Personen angemeldet.<br>Bitte trotzdem weiter anmelden, es könnte ja wieder jemand absagen!"
-    else:
-        meeting_message = f"Das Treffen am {next_meeting_date()} findet wegen zu geringer Beteiligung ({participant_count} Personen) nicht statt.<br>Sollte sich die Anzahl auf 4 erhöhen, findet es statt."
-    
     wrapped_meeting_message = wrap_text(meeting_message)
     submission_allowed = is_submission_allowed()
-    
+
+    participant_count, _ = db_manager.get_meeting_info()
+    if participant_count >= 4:
+        if submission_allowed:
+            meeting_message = f"Das Treffen am {next_meeting_date()} findet statt! Es haben sich {participant_count} Personen angemeldet.<br>Bitte trotzdem weiter anmelden, es könnte ja wieder jemand absagen!"
+        else:
+            meeting_message = f"Das Treffen am {next_meeting_date()} findet statt! Es haben sich {participant_count} Personen angemeldet."
+    else:
+        if submission_allowed:
+            meeting_message = f"Das Treffen am {next_meeting_date()} findet wegen zu geringer Beteiligung ({participant_count} Personen) nicht statt.<br>Sollte sich die Anzahl auf 4 erhöhen, findet es statt."
+        else:
+            meeting_message = f"Das Treffen am {next_meeting_date()} findet wegen zu geringer Beteiligung ({participant_count} Personen) nicht statt.<br>Vielleicht nächsten Freitag!"
+
     return render_template_string("""
         <html>
         <head>
