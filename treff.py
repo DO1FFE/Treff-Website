@@ -218,9 +218,9 @@ def index():
 
     participant_count, _ = db_manager.get_meeting_info()
     if participant_count >= 4:
-        meeting_message = f"Das Treffen am {next_meeting_date()} findet statt! Es haben sich {participant_count} Personen angemeldet."
+        meeting_message = f"Das Treffen am {next_meeting_date()} findet statt! Es haben sich {participant_count} Personen angemeldet.<br>Bitte trotzdem weiter anmelden, es könnte ja wieder jemand absagen!"
     else:
-        meeting_message = f"Das Treffen am {next_meeting_date()} findet wegen zu geringer Beteiligung ({participant_count} Personen) nicht statt. Sollte sich die Anzahl auf 4 erhöhen, findet es statt."
+        meeting_message = f"Das Treffen am {next_meeting_date()} findet wegen zu geringer Beteiligung ({participant_count} Personen) nicht statt.<br>Sollte sich die Anzahl auf 4 erhöhen, findet es statt."
     
     wrapped_meeting_message = wrap_text(meeting_message)
     submission_allowed = is_submission_allowed()
@@ -231,6 +231,7 @@ def index():
             <style>
                 body { font-family: Arial, sans-serif; }
                 .cancelled { color: red; }
+                .not_cancelled { color: green; }
                 @media only screen and (max-width: 600px) {
                     body { font-size: 20px; } /* Größere Schrift für mobile Geräte */
                     .message { white-space: normal; }
@@ -241,7 +242,7 @@ def index():
             <h2>Das nächste L11 Clubtreffen ist am Freitag, {{ next_meeting }}</h2>
             <h3>Hier kannst du dich dafür bis Donnerstag um 15Uhr anmelden.</h3>
             <h4>Bitte Freitags nachschauen, ob es stattfindet!!!</h4>
-            <p class="message {{ 'cancelled' if participant_count < 4 else '' }}">{{ meeting_message|safe }}</p>
+            <p class="message {{ 'cancelled' if participant_count < 4 else 'not_cancelled' }}">{{ meeting_message|safe }}</p>
             <p class="message" style="color:red;">{{ error_message }}</p>
             <form method="post">
                 <table>
