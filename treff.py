@@ -204,8 +204,8 @@ def index():
     participant_count = 0
 
     if request.method == 'POST':
-        name = request.form['name']
-        call_sign = request.form['call_sign']
+        name = request.form['name'].upper()
+        call_sign = request.form['call_sign'].upper()
 
         if not validate_input(name) or not validate_input(call_sign):
             error_message = "Ungültige Eingabe. Bitte nur Buchstaben, Zahlen und Bindestriche verwenden."
