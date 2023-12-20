@@ -8,6 +8,7 @@ import threading
 import time
 import pytz
 import re
+import os
 
 # Admin-Anmeldedaten einlesen aus .pwd Datei
 def load_credentials():
@@ -118,6 +119,15 @@ class DatabaseManager:
         participants = c.fetchall()
         return len(participants), participants
 
+    def get_all_entries(self):
+        """
+        Holt alle Einträge aus der Datenbank.
+        """
+        conn = self.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT * FROM meetings')
+        return c.fetchall()
+
 db_manager = DatabaseManager()
 
 def get_local_time():
@@ -154,6 +164,25 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
+def log_participants_to_file(participants, log_file_path='teilnahmen.log'):
+    """
+    Loggt die Teilnehmer in eine Datei.
+    """
+    if not participants:
+        return
+
+    # Eindeutige laufende Nummer für jeden Teilnehmer erzeugen
+    if os.path.exists(log_file_path):
+        with open(log_file_path, 'r') as file:
+            last_line = file.readlines()[-1]
+            last_number = int(last_line.split(' - ')[0])
+            start_number = last_number + 1
+    else:
+        start_number = 1
+
+    with open(log_file_path, 'a') as file:
+        for index, (name, call_sign) in enumerate(participants, start=start_number):
+            file.write(f"{index} - {next_meeting_date()}, {call_sign}, {name}\n")
 
 def weekly_db_reset():
     logger.info("Reset-Thread gestartet.")
@@ -168,6 +197,8 @@ def weekly_db_reset():
         time_to_wait = (next_reset - now).total_seconds()
         logger.info(f"Nächstes Datenbank-Reset geplant für: {next_reset}")
         time.sleep(max(time_to_wait, 0))
+        participants = db_manager.get_all_entries()
+        log_participants_to_file(participants)
         db_manager.reset_db()
         logger.info("Datenbank wurde zurückgesetzt")
 
