@@ -167,22 +167,16 @@ def requires_auth(f):
 def log_participants_to_file(participants, log_file_path='teilnahmen.log'):
     """
     Loggt die Teilnehmer in eine Datei.
+    Verwendet jetzt das aktuelle Datum statt des Datums des nächsten Treffens.
     """
     if not participants:
         return
 
-    # Eindeutige laufende Nummer für jeden Teilnehmer erzeugen
-    if os.path.exists(log_file_path):
-        with open(log_file_path, 'r') as file:
-            last_line = file.readlines()[-1]
-            last_number = int(last_line.split(' - ')[0])
-            start_number = last_number + 1
-    else:
-        start_number = 1
+    current_date = get_local_time().strftime('%d.%m.%Y')  # Aktuelles Datum verwenden
 
     with open(log_file_path, 'a') as file:
-        for index, (name, call_sign) in enumerate(participants, start=start_number):
-            file.write(f"{index} - {next_meeting_date()}, {call_sign}, {name}\n")
+        for name, call_sign in participants:
+            file.write(f"{current_date}, {call_sign}, {name}\n")
 
 def weekly_db_reset():
     logger.info("Reset-Thread gestartet.")
