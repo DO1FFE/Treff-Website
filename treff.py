@@ -336,7 +336,7 @@ def admin():
         <html>
         <body>
             <h2>Statistik</h2>
-            <img src=/statistik/teilnahmen_statistik.png" alt="Statistik">
+            <img src="/statistik/teilnahmen_statistik.png" alt="Statistik">
             <br><br>
             <h2>Teilnehmerliste</h2>
             <table border="1">
