@@ -335,6 +335,9 @@ def admin():
     return render_template_string("""
         <html>
         <body>
+            <h2>Statistik</h2>
+            <img src=/statistik/teilnahmen_statistik.png" alt="Statistik">
+            <br><br>
             <h2>Teilnehmerliste</h2>
             <table border="1">
                 <tr>
@@ -355,6 +358,11 @@ def admin():
         </body>
         </html>
     """, participants_with_index=participants_with_index)
+
+# Route für das Ausliefern von Statistiken hinzufügen
+@app.route('/statistik/<filename>')
+def event_graph(filename):
+    return send_from_directory('statistik', filename)
 
 if __name__ == '__main__':
     if not treff.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
