@@ -361,7 +361,7 @@ def admin():
 
 # Route für das Ausliefern von Statistiken hinzufügen
 @treff.route('/statistik/<filename>')
-def event_graph(filename):
+def statistik(filename):
     return send_from_directory('statistik', filename)
 
 if __name__ == '__main__':
