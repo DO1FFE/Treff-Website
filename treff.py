@@ -360,7 +360,7 @@ def admin():
     """, participants_with_index=participants_with_index)
 
 # Route für das Ausliefern von Statistiken hinzufügen
-@app.route('/statistik/<filename>')
+@treff.route('/statistik/<filename>')
 def event_graph(filename):
     return send_from_directory('statistik', filename)
 
