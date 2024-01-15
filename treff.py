@@ -9,6 +9,41 @@ import time
 import pytz
 import re
 import os
+import requests
+
+class DAPNET:
+    """
+    Diese Klasse implementiert einen Client für die DAPNET API.
+    Sie ermöglicht das Senden von Nachrichten über das DAPNET-Netzwerk.
+    """
+
+    def __init__(self, callsign, password, url='http://dapnet.db0sda.ampr.org:8080/calls'):
+        self.callsign = callsign
+        self.password = password
+        self.url = url
+        self.headers = {'Content-type': 'application/json'}
+
+    def send_message(self, message, destination_callsign, tx_group, emergency=False):
+        data = {
+            "text": message,
+            "callSignNames": [destination_callsign] if isinstance(destination_callsign, str) else destination_callsign,
+            "transmitterGroupNames": [tx_group] if isinstance(tx_group, str) else tx_group,
+            "emergency": emergency
+        }
+        response = requests.post(self.url, headers=self.headers, auth=(self.callsign, self.password), json=data)
+        return response
+
+    def log_message(self, message, destination_callsign, transmitter_group, emergency=False):
+        """
+        Sendet eine Logging-Nachricht über das DAPNET-Netzwerk.
+
+        :param message: Der Inhalt der Nachricht.
+        :param destination_callsign: Das Zielrufzeichen für die Nachricht.
+        :param transmitter_group: Die Transmittergruppe für die Nachricht.
+        :param emergency: Notfall-Flag (Standard False).
+        :return: Das Response-Objekt der HTTP-Anfrage.
+        """
+        return self.send_message(message, destination_callsign, transmitter_group, emergency)
 
 # Admin-Anmeldedaten einlesen aus .pwd Datei
 def load_credentials():
@@ -23,6 +58,8 @@ def load_credentials():
 credentials = load_credentials()
 ADMIN_USERNAME = credentials['ADMIN_USERNAME']
 ADMIN_PASSWORD = credentials['ADMIN_PASSWORD']
+dapnet_client = DAPNET(credentials['dapnet_username'], credentials['dapnet_password'])
+
 
 # Standardmäßige Reset-Zeit (Freitag um 21 Uhr)
 RESET_WEEKDAY = 4  # Freitag (Montag=0, Dienstag=1, ..., Sonntag=6)
@@ -78,7 +115,12 @@ class DatabaseManager:
         c.execute('INSERT INTO meetings (name, call_sign) VALUES (?, ?)', (name, call_sign))
         conn.commit()
         logger.info(f'Eintrag hinzugefügt: Rufzeichen: {call_sign}, Name: {name}')
-
+        dapnet_client.log_message(
+            f'Treff: Eintrag hinzugefügt: Rufzeichen: {call_sign}, Name: {name}',
+            'DO1FFE',
+            'all',
+            False
+        )
     def delete_entry(self, name, call_sign):
         conn = self.get_connection()
         c = conn.cursor()
@@ -93,6 +135,12 @@ class DatabaseManager:
             c.execute('DELETE FROM meetings WHERE call_sign = ?', (call_sign,))
         conn.commit()
         logger.info(f'Eintrag gelöscht: Rufzeichen: {call_sign}, Name: {name}')
+        dapnet_client.log_message(
+            f'Treff: Eintrag gelöscht: Rufzeichen: {call_sign}, Name: {name}',
+            'DO1FFE',
+            'all',
+            False
+        )
 
     def entry_exists(self, name, call_sign):
         conn = self.get_connection()
