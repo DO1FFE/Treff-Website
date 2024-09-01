@@ -275,6 +275,8 @@ def index():
     meeting_message = ""
     error_message = ""
     participant_count = 0
+    count, participants = db_manager.get_meeting_info()
+    participants_with_index = enumerate(participants, start=1)
 
     if request.method == 'POST':
         name = request.form['name'].upper()
@@ -341,13 +343,30 @@ def index():
                     </tr>
                 </table>
             </form>
+            <br><br>
+            <h2>Teilnehmerliste</h2>
+            <table border="1">
+                <tr>
+                    <th>#</th>
+                    <th>Rufzeichen</th>
+                    <th>Name</th>
+                </tr>
+                {% for index, (name, call_sign) in participants_with_index %}
+                <tr>
+                    <td>{{ index }}</td>
+                    <td>{{ call_sign }}</td>
+                    <td>{{ name }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <br><br>
             <p>Entweder das Rufzeichen oder den Namen angeben reicht aus.<br>Jede Person sollte sich selbst an- oder abmelden.<br>Bis Donnerstags 15Uhr hat jeder Zeit dazu.<br>Sind bis zu diesem Zeitpunkt zu wenige Anmeldungen, findet das Clubtreffen nicht statt! Ein Hinweistext wird oben angezeigt.<br>Die Datenbank resettet sich Freitags um 21Uhr, danach sind neue Anmeldungen für die Folgewoche möglich.<br>
             Fehler bitte wie immer gerne per Mail an mich senden: <a href="mailto:do1ffe@darc.de">do1ffe@darc.de</a><br>
             Vy 73 Erik, DO1FFE - OVV L11
             </p>
         </body>
         </html>
-    """, submission_allowed=submission_allowed, next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message, participant_count=participant_count)
+    """, submission_allowed=submission_allowed, next_meeting=next_meeting_date(), meeting_message=meeting_message, error_message=error_message, participant_count=participant_count, participants_with_index=participants_with_index)
 
 @treff.route('/confirm_delete')
 def confirm_delete():
